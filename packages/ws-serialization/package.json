@@ -1,7 +1,9 @@
 {
-  "name": "@fast-chat-js/bun-server",
-  "module": "index.ts",
+  "name": "@fast-chat-js/ws-serialization",
+  "private": true,
+  "version": "0.0.0",
   "type": "module",
+  "module": "index.ts",
   "devDependencies": {
     "bun-types": "^0.6.0"
   },

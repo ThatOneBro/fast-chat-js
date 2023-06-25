@@ -1,0 +1,10 @@
+{
+  "name": "fast-chat-js",
+  "version": "0.1.0",
+  "description": "A chat designed for speed",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
+}
