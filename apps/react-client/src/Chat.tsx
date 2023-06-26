@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { MSG_TYPES, MsgDeserializer } from "@fast-chat-js/ws-serialization";
 import type { MsgTypeName, MsgObj } from "@fast-chat-js/ws-serialization";
 
-type Message = {
+type UserText = {
   timestamp: number;
   username: string;
   text: string;
 };
 
-function ChatMessage({ timestamp, username, text }: Message) {
+function ChatMessage({ timestamp, username, text }: UserText) {
   return (
     <span>
       [{timestamp}] {username}: {text}
@@ -22,6 +22,7 @@ function ChatMessage({ timestamp, username, text }: Message) {
 // Fix X messages in the div
 
 let msgDeserializer: MsgDeserializer | undefined;
+let parseMsg: InstanceType<typeof MsgDeserializer>["parseMsg"] | undefined;
 
 export default function Chat({ serverUrl }: { serverUrl: URL | string }) {
   const [messages, setMessages] = useState<MsgObj[]>([]);
@@ -33,7 +34,8 @@ export default function Chat({ serverUrl }: { serverUrl: URL | string }) {
 
     ws.addEventListener("message", (e) => {
       msgDeserializer ??= new MsgDeserializer();
-      const msgObj = msgDeserializer.parseMsg(e.data as Uint8Array);
+      parseMsg ??= msgDeserializer.parseMsg;
+      const msgObj = parseMsg(e.data as Uint8Array);
       if ((msgObj.type as MsgTypeName) === MSG_TYPES[0])
         setMessages((s) => [...s, msgObj]);
     });

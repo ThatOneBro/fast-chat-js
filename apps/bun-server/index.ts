@@ -1,6 +1,7 @@
-import { MsgParser } from "@fast-chat-js/ws-serialization";
+import { MsgDeserializer } from "@fast-chat-js/ws-serialization";
 
-const { parseMsg } = new MsgParser();
+const deserializer = new MsgDeserializer();
+const { parseMsg } = deserializer;
 
 Bun.serve({
   fetch(req, server) {

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from "bun:test";
 import {
   MsgDeserializer,
-  getInt64BytesUnsafe,
+  getUint64BytesUnsafe,
   MSG_TYPES,
   getUint16BytesUnsafe,
   MsgSerializer,
@@ -28,7 +28,7 @@ describe("MsgDeserializer", () => {
 
       const bytes = new Uint8Array([
         0,
-        ...getInt64BytesUnsafe(BigInt(Date.now())),
+        ...getUint64BytesUnsafe(BigInt(Date.now())),
         ...getUint16BytesUnsafe(username.length),
         // username.length & 0xff,
         // (username.length >> 8) & 0xff,
@@ -50,36 +50,36 @@ describe("MsgDeserializer", () => {
     });
   });
 
-  // describe("serializeMsgObj", () => {
-  //   let serializer: MsgSerializer;
-  //   beforeAll(() => {
-  //     serializer = new MsgSerializer();
-  //   });
+  describe("serializeMsgObj", () => {
+    let serializer: MsgSerializer;
+    beforeAll(() => {
+      serializer = new MsgSerializer();
+    });
 
-  //   it("should serialize a valid message object", () => {
-  //     const username = "John";
-  //     const textMsg = "Hello, world!";
-  //     const dateNow = Date.now();
+    it("should serialize a valid message object", () => {
+      const username = "John";
+      const textMsg = "Hello, world!";
+      const dateNow = Date.now();
 
-  //     const msgObj = {
-  //       type: "userText",
-  //       timestamp: dateNow,
-  //       fields: {
-  //         username,
-  //         text: textMsg,
-  //       },
-  //     } as MsgObj;
+      const msgObj = {
+        type: "userText",
+        timestamp: dateNow,
+        fields: {
+          username,
+          text: textMsg,
+        },
+      } as MsgObj;
 
-  //     const msgAsBytes = new Uint8Array([
-  //       0,
-  //       ...getInt64BytesUnsafe(BigInt(dateNow)),
-  //       ...getUint16BytesUnsafe(username.length),
-  //       ...textEncoder.encode(username),
-  //       ...getUint16BytesUnsafe(textMsg.length),
-  //       ...textEncoder.encode(textMsg),
-  //     ]);
+      const msgAsBytes = new Uint8Array([
+        0,
+        ...getUint64BytesUnsafe(BigInt(dateNow)),
+        ...getUint16BytesUnsafe(username.length),
+        ...textEncoder.encode(username),
+        ...getUint16BytesUnsafe(textMsg.length),
+        ...textEncoder.encode(textMsg),
+      ]);
 
-  //     expect(serializer.serializeMsgObj(msgObj)).toEqual(msgAsBytes);
-  //   });
-  // });
+      expect(serializer.serializeMsgObj(msgObj)).toEqual(msgAsBytes);
+    });
+  });
 });

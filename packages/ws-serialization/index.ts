@@ -114,45 +114,48 @@ export function getUint16(
   return dataView.getUint16(byteOffset, littleEndian);
 }
 
-// export class BufferPool {
-//   private _buffers: Buffer[] | undefined;
-//   private _bytesToAllocate;
-//   private _size = 0;
-//   private _capacity: number;
-//   constructor(bufferSize = 8, poolCapacity = 32) {
-//     this._bytesToAllocate = bufferSize;
-//     this._capacity = poolCapacity;
-//   }
-
-//   getBufferOrAlloc() {
-//     let buf: Buffer | undefined;
-//     if (this._size > 0) {
-//       buf = (this._buffers as Buffer[]).pop() as Buffer;
-//       this._size -= 1;
-//     } else {
-//       buf = Buffer.alloc(this._bytesToAllocate);
-//     }
-//     return buf;
-//   }
-
-//   free(buf: Buffer) {
-//     if (this._size === this._capacity) return;
-//     this._buffers ??= [];
-//     this._buffers.push(buf);
-//     this._size += 1;
-//   }
-// }
-
-export function getInt64BytesUnsafe(x: bigint): Buffer {
-  const bytes = Buffer.allocUnsafe(8);
-  bytes.writeBigInt64LE(x);
-  return bytes;
+export function setBigUint64(
+  dataView: DataView,
+  value: bigint,
+  byteOffset: number = 0,
+  littleEndian: boolean = true,
+) {
+  return dataView.setBigUint64(byteOffset, value, littleEndian);
 }
 
-export function getUint16BytesUnsafe(x: number): Buffer {
-  const bytes = Buffer.allocUnsafe(2);
-  bytes.writeUint16LE(x);
-  return bytes;
+export function setUint16(
+  dataView: DataView,
+  value: number,
+  byteOffset: number = 0,
+  littleEndian: boolean = true,
+) {
+  return dataView.setUint16(byteOffset, value, littleEndian);
+}
+
+export function getUint64BytesUnsafe(x: bigint): Uint8Array {
+  const bytes = new ArrayBuffer(8);
+  const view = new BigUint64Array(bytes);
+  view[0] = x;
+  return new Uint8Array(bytes);
+}
+
+export function getUint16BytesUnsafe(x: number): Uint8Array {
+  const bytes = new ArrayBuffer(2);
+  const view = new Uint16Array(bytes);
+  view[0] = x;
+  return new Uint8Array(bytes);
+}
+
+export function encodeIntoAtOffset(
+  encoder: TextEncoder,
+  str: string,
+  byteArr: Uint8Array,
+  byteOffset: number = 0,
+) {
+  return encoder.encodeInto(
+    str,
+    byteOffset ? byteArr.subarray(byteOffset) : byteArr,
+  );
 }
 
 export class MsgDeserializer {
@@ -212,13 +215,47 @@ export class MsgSerializer {
   serializeMsgObj(msgObj: MsgObj): Uint8Array {
     const { type, timestamp, fields } = msgObj;
     // read type of message, encode its index in MSG_TYPES as number
+    console.log(msgObj);
     const typeIdx = MSG_TYPES.indexOf(type as MsgTypeName);
-    if (!typeIdx) throw new Error("Invalid type!");
+    if (typeIdx < 0) throw new Error("Invalid type!");
     if (typeof timestamp !== "number") throw new Error("Invalid timestamp!");
 
+    // PERF: Is it faster to do this once and just concat the buffers, or find the len first faster?
+    let bufLen = 9; // 1 + 8, type byte + 8 bytes for timestamp
+    for (let i = 0; i < MSG_FIELDS[typeIdx].length; i += 1) {
+      bufLen += fields[MSG_FIELDS[typeIdx][i]].length + 2;
+    }
+    const msgBuf = new Uint8Array(bufLen);
+    const dataView = new DataView(msgBuf.buffer);
+    msgBuf[0] = typeIdx;
+    setBigUint64(dataView, BigInt(timestamp), 1);
+
+    let currPos = 9;
     // need to sort fields in the order they occur in...
-    // compute length of type - 1 byte
-    // timestamp -- 64 bits / 8 = 8 bytes
-    // len -- 1 byte
+    for (let i = 0; i < MSG_FIELDS[typeIdx].length; i += 1) {
+      const fieldVal = fields[MSG_FIELDS[typeIdx][i]];
+      const fieldLen = fieldVal.length;
+      // Set the length of the field
+      setUint16(dataView, fieldLen, currPos);
+      currPos += 2;
+
+      // TODO: validate field type works for this field
+      const fieldType = MSG_FIELD_TYPES[typeIdx][i];
+      switch (fieldType) {
+        case "string":
+          const encoder = (this._textEncoder ??= new TextEncoder());
+          encodeIntoAtOffset(encoder, fieldVal, msgBuf, currPos);
+          currPos += fieldLen;
+          break;
+        case "number":
+          // TODO: Support numbers larger than 8 bits
+          msgBuf[currPos] = fieldVal;
+          currPos += 1;
+          break;
+        default:
+          throw new Error("Broken!");
+      }
+    }
+    return msgBuf;
   }
 }

@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeAll } from "bun:test";
-import {
-  MsgDeserializer,
-  getInt64BytesUnsafe,
-} from "@fast-chat-js/ws-serialization";
+// import {
+//   MsgDeserializer,
+// } from "@fast-chat-js/ws-serialization";
 
 import type { Server } from "bun";
 
