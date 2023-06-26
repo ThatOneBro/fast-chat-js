@@ -33,8 +33,7 @@ export default function Chat({ serverUrl }: { serverUrl: URL | string }) {
     const ws = new WebSocket(serverUrl);
 
     ws.addEventListener("message", (e) => {
-      msgDeserializer ??= new MsgDeserializer();
-      parseMsg ??= msgDeserializer.parseMsg;
+      parseMsg ??= (msgDeserializer ??= new MsgDeserializer()).parseMsg;
       const msgObj = parseMsg(e.data as Uint8Array);
       if ((msgObj.type as MsgTypeName) === MSG_TYPES[0])
         setMessages((s) => [...s, msgObj]);

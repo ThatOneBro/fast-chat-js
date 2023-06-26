@@ -1,11 +1,12 @@
-import { MsgDeserializer, MsgSerializer } from "@fast-chat-js/ws-serialization";
+import { MsgSerializer } from "@fast-chat-js/ws-serialization";
 
-// TODO: Lazy load these?
-const deserializer = new MsgDeserializer();
-const serializer = new MsgSerializer();
+// let msgDeserializer: MsgDeserializer | undefined;
+let msgSerializer: MsgSerializer | undefined;
 
-const { parseMsg } = deserializer;
-const { serializeMsgObj } = serializer;
+// let parseMsg: InstanceType<typeof MsgDeserializer>["parseMsg"] | undefined;
+let serializeMsgObj:
+  | InstanceType<typeof MsgSerializer>["serializeMsgObj"]
+  | undefined;
 
 Bun.serve<{ username: string }>({
   fetch(req, server) {
@@ -14,7 +15,6 @@ Bun.serve<{ username: string }>({
       server.upgrade(req, {
         data: {
           username: new URL(req.url).searchParams.get("username"),
-          // authToken: cookies["X-Token"],
         },
       })
     ) {
@@ -32,6 +32,8 @@ Bun.serve<{ username: string }>({
     }, // a message is received
     open(ws) {
       ws.subscribe("main");
+      serializeMsgObj ??= (msgSerializer ??= new MsgSerializer())
+        .serializeMsgObj;
       ws.publishBinary(
         "main",
         serializeMsgObj({
