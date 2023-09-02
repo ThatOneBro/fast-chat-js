@@ -1,0 +1,59 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.0.0/schema.json",
+  "organizeImports": {
+    "enabled": false
+  },
+  "formatter": {
+    "enabled": false,
+    "indentStyle": "space",
+    "lineWidth": 120
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "style": {
+        "noParameterAssign": "warn"
+      },
+      "suspicious": {
+        "noExplicitAny": "warn",
+        "noAssignInExpressions": "warn"
+      },
+      "complexity": {
+        "noForEach": "error",
+        "useSimplifiedLogicExpression": "error"
+      },
+      "a11y": {
+        "noBlankTarget": "off",
+
+        "noRedundantAlt": "warn",
+        "useValidAnchor": "warn",
+        "noSvgWithoutTitle": "warn",
+        "useKeyWithClickEvents": "warn",
+        "useIframeTitle": "warn",
+        "useKeyWithMouseEvents": "warn",
+        "useButtonType": "warn",
+        "noPositiveTabindex": "warn",
+        "useMediaCaption": "warn",
+        "useAltText": "warn"
+      },
+      "nursery": {
+        "noExcessiveComplexity": {
+          "level": "warn",
+          "options": {
+            "maxAllowedComplexity": 15
+          }
+        }
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "trailingComma": "all",
+      "arrowParentheses": "always"
+    }
+  },
+  "files": {
+    "ignore": ["**/dist/**/*", "**/build/**/*", "**/.next/**/*"]
+  }
+}
