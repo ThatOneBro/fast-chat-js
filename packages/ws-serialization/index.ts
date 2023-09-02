@@ -88,8 +88,8 @@ export type MsgObj = {
 
 export function getUint64(
   dataView: DataView,
-  byteOffset: number = 0,
-  littleEndian: boolean = true,
+  byteOffset = 0,
+  littleEndian = true,
 ) {
   // split 64-bit number into two 32-bit (4-byte) parts
   const left = dataView.getUint32(byteOffset, littleEndian);
@@ -108,8 +108,8 @@ export function getUint64(
 
 export function getUint16(
   dataView: DataView,
-  byteOffset: number = 0,
-  littleEndian: boolean = true,
+  byteOffset = 0,
+  littleEndian = true,
 ) {
   return dataView.getUint16(byteOffset, littleEndian);
 }
@@ -117,8 +117,8 @@ export function getUint16(
 export function setBigUint64(
   dataView: DataView,
   value: bigint,
-  byteOffset: number = 0,
-  littleEndian: boolean = true,
+  byteOffset = 0,
+  littleEndian = true,
 ) {
   return dataView.setBigUint64(byteOffset, value, littleEndian);
 }
@@ -126,8 +126,8 @@ export function setBigUint64(
 export function setUint16(
   dataView: DataView,
   value: number,
-  byteOffset: number = 0,
-  littleEndian: boolean = true,
+  byteOffset = 0,
+  littleEndian = true,
 ) {
   return dataView.setUint16(byteOffset, value, littleEndian);
 }
@@ -150,7 +150,7 @@ export function encodeIntoAtOffset(
   encoder: TextEncoder,
   str: string,
   byteArr: Uint8Array,
-  byteOffset: number = 0,
+  byteOffset = 0,
 ) {
   return encoder.encodeInto(
     str,
@@ -215,7 +215,6 @@ export class MsgSerializer {
   serializeMsgObj(msgObj: MsgObj): Uint8Array {
     const { type, timestamp, fields } = msgObj;
     // read type of message, encode its index in MSG_TYPES as number
-    console.log(msgObj);
     const typeIdx = MSG_TYPES.indexOf(type as MsgTypeName);
     if (typeIdx < 0) throw new Error("Invalid type!");
     if (typeof timestamp !== "number") throw new Error("Invalid timestamp!");
@@ -242,11 +241,12 @@ export class MsgSerializer {
       // TODO: validate field type works for this field
       const fieldType = MSG_FIELD_TYPES[typeIdx][i];
       switch (fieldType) {
-        case "string":
+        case "string": {
           const encoder = (this._textEncoder ??= new TextEncoder());
           encodeIntoAtOffset(encoder, fieldVal, msgBuf, currPos);
           currPos += fieldLen;
           break;
+        }
         case "number":
           // TODO: Support numbers larger than 8 bits
           msgBuf[currPos] = fieldVal;

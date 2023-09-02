@@ -5,6 +5,10 @@
   "type": "module",
   "workspaces": [
     "packages/*",
-    "apps/*"
-  ]
+    "apps/*",
+    "benchmark"
+  ],
+  "scripts": {
+    "benchmark": "bun ./benchmark/index.ts"
+  }
 }

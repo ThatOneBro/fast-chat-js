@@ -1,0 +1,12 @@
+{
+  "name": "@fast-chat-js/benchmark",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest",
+    "mitata": "^0.1.6"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
